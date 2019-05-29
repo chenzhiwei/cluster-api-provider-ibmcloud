@@ -55,21 +55,21 @@ const (
 )
 
 // Actuator is responsible for performing machine reconciliation
-type IbmCloudClient struct {
+type IBMCloudClient struct {
 	params ibmcloud.ActuatorParams
 	client client.Client
 }
 
 // NewActuator creates a new Actuator
-func NewActuator(params ibmcloud.ActuatorParams) (*IbmCloudClient, error) {
-	return &IbmCloudClient{
+func NewActuator(params ibmcloud.ActuatorParams) (*IBMCloudClient, error) {
+	return &IBMCloudClient{
 		params: params,
 		client: params.Client,
 	}, nil
 }
 
 // Create creates a machine and is invoked by the Machine Controller
-func (ic *IbmCloudClient) Create(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
+func (ic *IBMCloudClient) Create(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
 	klog.Infof("Creating machine %v for cluster %v.", machine.Name, cluster.Name)
 
 	ic.updatePhase(ctx, machine, MachinePending)
@@ -153,7 +153,7 @@ func (ic *IbmCloudClient) Create(ctx context.Context, cluster *clusterv1.Cluster
 }
 
 // Delete deletes a machine and is invoked by the Machine Controller
-func (ic *IbmCloudClient) Delete(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
+func (ic *IBMCloudClient) Delete(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
 	machineService, err := ibmcloudclients.NewInstanceServiceFromMachine(ic.params.KubeClient, machine)
 	if err != nil {
 		return err
@@ -182,7 +182,7 @@ func (ic *IbmCloudClient) Delete(ctx context.Context, cluster *clusterv1.Cluster
 }
 
 // Update updates a machine and is invoked by the Machine Controller
-func (ic *IbmCloudClient) Update(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
+func (ic *IBMCloudClient) Update(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
 	klog.Infof("Updating machine %v for cluster %v.", machine.Name, cluster.Name)
 
 	// TODO(xunpan): node ref updating?
@@ -258,7 +258,7 @@ func (ic *IbmCloudClient) Update(ctx context.Context, cluster *clusterv1.Cluster
 }
 
 // Exists test for the existance of a machine and is invoked by the Machine Controller
-func (ic *IbmCloudClient) Exists(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) (bool, error) {
+func (ic *IBMCloudClient) Exists(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) (bool, error) {
 	guest, err := ic.getGuest(machine)
 	if err != nil {
 		return false, err
@@ -276,7 +276,7 @@ func (ic *IbmCloudClient) Exists(ctx context.Context, cluster *clusterv1.Cluster
 	return guest != nil, nil
 }
 
-func (ic *IbmCloudClient) getGuest(machine *clusterv1.Machine) (*datatypes.Virtual_Guest, error) {
+func (ic *IBMCloudClient) getGuest(machine *clusterv1.Machine) (*datatypes.Virtual_Guest, error) {
 	machineService, err := ibmcloudclients.NewInstanceServiceFromMachine(ic.params.KubeClient, machine)
 	if err != nil {
 		return nil, err
@@ -294,7 +294,7 @@ func (ic *IbmCloudClient) getGuest(machine *clusterv1.Machine) (*datatypes.Virtu
 	return guest, nil
 }
 
-func (ic *IbmCloudClient) getIP(machine *clusterv1.Machine) (string, error) {
+func (ic *IBMCloudClient) getIP(machine *clusterv1.Machine) (string, error) {
 	guest, err := ic.getGuest(machine)
 	if err != nil {
 		return "", err
@@ -309,7 +309,7 @@ func (ic *IbmCloudClient) getIP(machine *clusterv1.Machine) (string, error) {
 	return *guest.PrimaryIpAddress, nil
 }
 
-func (ic *IbmCloudClient) updateMachine(machine *clusterv1.Machine, id string) error {
+func (ic *IBMCloudClient) updateMachine(machine *clusterv1.Machine, id string) error {
 	if machine.ObjectMeta.Annotations == nil {
 		machine.ObjectMeta.Annotations = make(map[string]string)
 	}
@@ -332,7 +332,7 @@ func (ic *IbmCloudClient) updateMachine(machine *clusterv1.Machine, id string) e
 	return nil
 }
 
-func (ic *IbmCloudClient) createBootstrapToken() (string, error) {
+func (ic *IBMCloudClient) createBootstrapToken() (string, error) {
 	token, err := tokenutil.GenerateBootstrapToken()
 	if err != nil {
 		return "", err
@@ -355,7 +355,7 @@ func (ic *IbmCloudClient) createBootstrapToken() (string, error) {
 	), nil
 }
 
-func (ic *IbmCloudClient) updatePhase(ctx context.Context, machine *clusterv1.Machine, status string) {
+func (ic *IBMCloudClient) updatePhase(ctx context.Context, machine *clusterv1.Machine, status string) {
 	machine.Status.Phase = sl.String(status)
 	err := ic.params.Client.Status().Update(ctx, machine)
 	if err != nil {
